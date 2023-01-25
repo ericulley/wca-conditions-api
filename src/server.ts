@@ -1,23 +1,42 @@
 import express from 'express';
-import http from 'http';
 import mongoose from 'mongoose';
+import { start } from 'repl';
 import { config } from './config/config';
 import log from './utils/logger';
+import helmet from 'helmet';
+import cors from 'cors';
 
 const app = express();
 
 // Connect to Mongo
 mongoose
-  .connect(config.mongo.url, { w: 'majority', retryWrites: true })
-  .then(() => {
-    log.info('connected to DB');
-  })
-  .catch((err) => {
-    log.error(err);
-  });
+    .connect(config.mongo.url, { w: 'majority', retryWrites: true })
+    .then(() => {
+        log.info('connected to DB');
+        startServer();
+    })
+    .catch((err) => {
+        log.error(err);
+    });
 
-mongoose.set('strictQuery', true);
+// Start Server
+const startServer = () => {
+    // Middleware
+    app.use(express.urlencoded({ extended: true }));
+    app.use(express.json());
+    app.use(cors());
+    app.use(helmet());
 
-app.listen(() => {
-  log.info('listenting on port: ' + config.server.port);
-});
+    // Routes
+
+    //Health Check & Default Route
+    app.get('/', (req, res, next) => {
+        res.status(200).json('OK');
+    });
+
+    // Start Server
+    const port = config.server.port;
+    app.listen(port, () => {
+        log.info('listenting on port: ' + port);
+    });
+};

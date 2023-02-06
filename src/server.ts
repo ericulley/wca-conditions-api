@@ -6,11 +6,18 @@ import log from './utils/logger';
 import helmet from 'helmet';
 import cors from 'cors';
 
+// Import Controllers
+import generalReportController from '../src/controllers/GeneralReport.controller';
+
+// Instantiate App
 const app = express();
 
 // Connect to Mongo
 mongoose
-    .connect(config.mongo.url, { w: 'majority', retryWrites: true })
+    .connect(config.mongo.url, {
+        w: 'majority',
+        retryWrites: true,
+    })
     .then(() => {
         log.info('connected to DB');
         startServer();
@@ -28,6 +35,10 @@ const startServer = () => {
     app.use(helmet());
 
     // Routes
+    app.use('/general', generalReportController);
+    // Reports
+    // Rivers
+    // Lakes
 
     //Health Check & Default Route
     app.get('/', (req, res, next) => {

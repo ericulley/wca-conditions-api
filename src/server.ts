@@ -1,33 +1,35 @@
 import express from 'express';
-import mongoose from 'mongoose';
-import { start } from 'repl';
+// import { db } from './db';
 import { config } from './config/config';
+import { MongoClient } from 'mongodb';
 import log from './utils/logger';
 import helmet from 'helmet';
 import cors from 'cors';
 
-// Import Controllers
-import generalReportController from '../src/controllers/GeneralReport.controller';
-
 // Instantiate App
 const app = express();
 
-// Connect to Mongo
-mongoose
-    .connect(config.mongo.url, {
-        w: 'majority',
-        retryWrites: true,
-    })
-    .then(() => {
-        log.info('connected to DB');
-        startServer();
-    })
-    .catch((err) => {
-        log.error(err);
-    });
+// Configure DB
+export const mongoClient = new MongoClient(config.mongo.url);
+export const db = mongoClient.db();
+const connectDB = async () => {
+    try {
+        await mongoClient.connect();
+        log.info('connected to db');
+    } catch (error: any) {
+        await mongoClient.close();
+        log.error(error.message);
+    }
+};
+
+// Import Controllers
+import general from '../src/controllers/GeneralReport.controller';
 
 // Start Server
-const startServer = () => {
+const startServer = async () => {
+    // Connect to DB
+    await connectDB();
+
     // Middleware
     app.use(express.urlencoded({ extended: true }));
     app.use(express.json());
@@ -35,7 +37,7 @@ const startServer = () => {
     app.use(helmet());
 
     // Routes
-    app.use('/general', generalReportController);
+    app.use('/general', general);
     // Reports
     // Rivers
     // Lakes
@@ -51,3 +53,5 @@ const startServer = () => {
         log.info('listenting on port: ' + port);
     });
 };
+
+startServer();

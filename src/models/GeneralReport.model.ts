@@ -1,29 +1,15 @@
-import mongoose, { Document, Schema } from 'mongoose';
+import { ObjectId } from 'mongodb';
 import { z } from 'zod';
+import { db } from '../server';
 
 const ZGeneralReport = z.object({
-    _id: z.number().optional(),
-    name: z.string(),
+    _id: z.instanceof(ObjectId).optional(),
     report: z.string(),
-    hatches: z.string(),
-    flies: z.string(),
-    createdAt: z.string().optional(),
-    updatedAt: z.string().optional(),
+    date: z.date(),
+    createdAt: z.number().nullable(),
+    updatedAt: z.number().optional().nullable(),
 });
 
 export type TGeneralReport = z.infer<typeof ZGeneralReport>;
 
-const GeneralReportMongooseSchema = new mongoose.Schema<TGeneralReport, Document>({
-    name: String,
-    report: String,
-    hatches: String,
-    flies: String,
-    createdAt: String,
-    updatedAt: String,
-});
-
-// export interface IReportModel extends IReport, Document {}
-const GeneralReportSchema: Schema = new Schema(GeneralReportMongooseSchema, { versionKey: false });
-
-const GeneralReport = mongoose.model<TGeneralReport>('Report', GeneralReportSchema);
-export default GeneralReport;
+export const GeneralReports = db.collection<TGeneralReport>('reports');

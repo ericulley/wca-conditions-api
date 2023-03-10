@@ -1,86 +1,103 @@
 import express, { NextFunction, Request, Response } from 'express';
-import mongoose from 'mongoose';
-import GeneralReportModel, { TGeneralReport } from '../models/GeneralReport.model';
+import { ObjectId, UpdateResult } from 'mongodb';
+import { GeneralReports, TGeneralReport } from '../models/GeneralReport.model';
+import log from '../utils/logger';
 
 // General Report Router (e.g. {hostname}/general/...)
 const general = express.Router();
 
-// Create a General Report
-general.post('/reports', (req: Request, res: Response, next: NextFunction) => {
-    const reqBody: TGeneralReport = req.body;
-    const generalReport = new GeneralReportModel(reqBody);
-    console.log('reqBody: ', reqBody);
-    console.log('POST /general/report: ', generalReport);
-    return generalReport
-        .save()
-        .then((report) => {
-            res.status(200).send(report);
-        })
-        .catch((error) => {
-            res.status(500).send({ error });
-        });
+// Create and Archive a General Report
+general.post('/reports', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const reqData = req.body as TGeneralReport;
+        if (!reqData.createdAt) reqData.createdAt = Date.now();
+        if (!reqData.updatedAt) reqData.updatedAt = undefined;
+        const record = await GeneralReports.insertOne(reqData);
+        if (record) {
+            res.status(200).send(record);
+        } else {
+            res.status(400).json({ message: 'Bad Request' });
+        }
+    } catch (error: any) {
+        res.status(500).send({ error: error.message });
+    }
 });
 
-// Read a General Report
-general.get('/reports/:reportId', (req: Request, res: Response, next: NextFunction) => {
-    const generalReportId = req.params.reportId;
-    return GeneralReportModel.findById(generalReportId)
-        .then((report) => {
-            report ? res.status(200).send(report) : res.status(404).json({ message: 'Not found' });
-        })
-        .catch((error: Error) => {
-            console.error(error.message);
-        });
+// Get a General Report
+general.get('/reports/:reportId', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const generalReportId = req.params.reportId;
+        const record = await GeneralReports.findOne({ _id: new ObjectId(generalReportId) });
+        if (record) {
+            res.status(200).send(record);
+        } else if (!record) {
+            res.status(400).json({ message: 'Record Not Found' });
+        }
+    } catch (error: any) {
+        res.status(500).send({ error: error.message });
+    }
 });
 
-// ReadAll General Reports
-general.get('/reports/', (req: Request, res: Response, next: NextFunction) => {
-    GeneralReportModel.find()
-        .then((reports) => {
-            console.log('REPORTS: ', reports);
-            res.status(200).send(reports);
-        })
-        .catch((error: any) => {
-            console.log(error.message);
-        });
+// Get All General Reports
+general.get('/reports/', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const records = await GeneralReports.find(
+            { _id: { $exists: true } },
+            { limit: 20 }
+        ).toArray();
+        if (records) {
+            res.status(200).send(records);
+        } else if (!records) {
+            res.status(400).json({ message: 'Records Not Found' });
+        }
+    } catch (error: any) {
+        res.status(500).send({ error: error.message });
+    }
 });
 
 // Update General Report
-general.put('/reports/:reportId', (req: Request, res: Response, next: NextFunction) => {
-    const generalReportId = req.params.reportId;
-    return GeneralReportModel.findById(generalReportId)
-        .then((report) => {
-            if (report) {
-                report.set(req.body);
-                return report
-                    .save()
-                    .then((updatedReport) => {
-                        res.status(200).send(updatedReport);
-                    })
-                    .catch((error) => {
-                        res.status(500).send({ error });
-                    });
-            } else {
-                res.status(404).json({ message: 'Not found' });
+general.put('/reports/:reportId', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const reqData = req.body as TGeneralReport;
+        const generalReportId = req.params.reportId;
+        const record: UpdateResult = await GeneralReports.updateOne(
+            { _id: new ObjectId(generalReportId) },
+            {
+                $set: {
+                    report: reqData.report,
+                    date: reqData.date,
+                    updatedAt: Date.now(),
+                },
             }
-        })
-        .catch((error: any) => {
-            console.log(error.message);
-        });
+        );
+        if (record.acknowledged && record.matchedCount > 0) {
+            res.status(200).send(record);
+        }
+        if (record.acknowledged && record.matchedCount == 0) {
+            res.status(400).json({ message: 'Record Not Found' });
+        } else if (!record) {
+            res.status(400).json({ message: 'Record Not Found' });
+        }
+    } catch (error: any) {
+        res.status(500).send({ error: error.message });
+    }
 });
 
 // Delete Genereal Report
-general.delete('/reports/:reportId', (req: Request, res: Response, next: NextFunction) => {
-    const generalReportId = req.params.reportId;
-    return GeneralReportModel.findByIdAndDelete(generalReportId)
-        .then((report) => {
-            report
-                ? res.status(201).json({ message: 'Deleted' })
-                : res.status(404).json({ message: 'Not found' });
-        })
-        .catch((error: any) => {
-            console.log(error.message);
+general.delete('/reports/:reportId', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const generalReportId = req.params.reportId;
+        const deletedRecord = await GeneralReports.deleteOne({
+            _id: new ObjectId(generalReportId),
         });
+        if (deletedRecord.acknowledged && deletedRecord.deletedCount > 0)
+            res.status(201).json({ message: 'Record Deleted' });
+        if (deletedRecord.acknowledged && deletedRecord.deletedCount == 0)
+            res.status(400).json({ message: 'Record Not Found' });
+        if (!deletedRecord.acknowledged) res.status(400).json({ message: 'Bad Request' });
+    } catch (error: any) {
+        res.status(500).send({ error: error.message });
+    }
 });
 
 export default general;

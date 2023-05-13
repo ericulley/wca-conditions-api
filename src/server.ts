@@ -23,7 +23,7 @@ const connectDB = async () => {
 };
 
 // Import Controllers
-import general from '../src/controllers/GeneralReport.controller';
+import reports from './controllers/GeneralReports.controller';
 
 // Start Server
 const startServer = async () => {
@@ -37,7 +37,7 @@ const startServer = async () => {
     app.use(helmet());
 
     // Routes
-    app.use('/general', general);
+    app.use('/general', reports);
     // Reports
     // Rivers
     // Lakes

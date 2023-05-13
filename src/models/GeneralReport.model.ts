@@ -12,4 +12,4 @@ const ZGeneralReport = z.object({
 
 export type TGeneralReport = z.infer<typeof ZGeneralReport>;
 
-export const GeneralReports = db.collection<TGeneralReport>('reports');
+export const GeneralReport = db.collection<TGeneralReport>('reports');

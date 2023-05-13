@@ -1,18 +1,18 @@
 import express, { NextFunction, Request, Response } from 'express';
 import { ObjectId, UpdateResult } from 'mongodb';
-import { GeneralReports, TGeneralReport } from '../models/GeneralReport.model';
+import { GeneralReport, TGeneralReport } from '../models/GeneralReport.model';
 import log from '../utils/logger';
 
 // General Report Router (e.g. {hostname}/general/...)
-const general = express.Router();
+const reports = express.Router();
 
 // Create and Archive a General Report
-general.post('/reports', async (req: Request, res: Response, next: NextFunction) => {
+reports.post('/reports', async (req: Request, res: Response, next: NextFunction) => {
     try {
         const reqData = req.body as TGeneralReport;
         if (!reqData.createdAt) reqData.createdAt = Date.now();
         if (!reqData.updatedAt) reqData.updatedAt = undefined;
-        const record = await GeneralReports.insertOne(reqData);
+        const record = await GeneralReport.insertOne(reqData);
         if (record) {
             res.status(200).send(record);
         } else {
@@ -24,10 +24,10 @@ general.post('/reports', async (req: Request, res: Response, next: NextFunction)
 });
 
 // Get a General Report
-general.get('/reports/:reportId', async (req: Request, res: Response, next: NextFunction) => {
+reports.get('/reports/:reportId', async (req: Request, res: Response, next: NextFunction) => {
     try {
         const generalReportId = req.params.reportId;
-        const record = await GeneralReports.findOne({ _id: new ObjectId(generalReportId) });
+        const record = await GeneralReport.findOne({ _id: new ObjectId(generalReportId) });
         if (record) {
             res.status(200).send(record);
         } else if (!record) {
@@ -39,9 +39,9 @@ general.get('/reports/:reportId', async (req: Request, res: Response, next: Next
 });
 
 // Get All General Reports
-general.get('/reports/', async (req: Request, res: Response, next: NextFunction) => {
+reports.get('/reports/', async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const records = await GeneralReports.find(
+        const records = await GeneralReport.find(
             { _id: { $exists: true } },
             { limit: 20 }
         ).toArray();
@@ -56,11 +56,11 @@ general.get('/reports/', async (req: Request, res: Response, next: NextFunction)
 });
 
 // Update General Report
-general.put('/reports/:reportId', async (req: Request, res: Response, next: NextFunction) => {
+reports.put('/reports/:reportId', async (req: Request, res: Response, next: NextFunction) => {
     try {
         const reqData = req.body as TGeneralReport;
         const generalReportId = req.params.reportId;
-        const record: UpdateResult = await GeneralReports.updateOne(
+        const record: UpdateResult = await GeneralReport.updateOne(
             { _id: new ObjectId(generalReportId) },
             {
                 $set: {
@@ -84,10 +84,10 @@ general.put('/reports/:reportId', async (req: Request, res: Response, next: Next
 });
 
 // Delete Genereal Report
-general.delete('/reports/:reportId', async (req: Request, res: Response, next: NextFunction) => {
+reports.delete('/reports/:reportId', async (req: Request, res: Response, next: NextFunction) => {
     try {
         const generalReportId = req.params.reportId;
-        const deletedRecord = await GeneralReports.deleteOne({
+        const deletedRecord = await GeneralReport.deleteOne({
             _id: new ObjectId(generalReportId),
         });
         if (deletedRecord.acknowledged && deletedRecord.deletedCount > 0)
@@ -100,4 +100,4 @@ general.delete('/reports/:reportId', async (req: Request, res: Response, next: N
     }
 });
 
-export default general;
+export default reports;

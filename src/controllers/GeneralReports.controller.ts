@@ -6,7 +6,7 @@ import log from '../utils/logger';
 // General Report Router (e.g. {hostname}/general/...)
 const reports = express.Router();
 
-// Create and Archive a General Report
+// Create a General Report
 reports.post('/reports', async (req: Request, res: Response, next: NextFunction) => {
     try {
         const reqData = req.body as TGeneralReport;
@@ -17,21 +17,6 @@ reports.post('/reports', async (req: Request, res: Response, next: NextFunction)
             res.status(200).send(record);
         } else {
             res.status(400).json({ message: 'Bad Request' });
-        }
-    } catch (error: any) {
-        res.status(500).send({ error: error.message });
-    }
-});
-
-// Get a General Report
-reports.get('/reports/:reportId', async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const generalReportId = req.params.reportId;
-        const record = await GeneralReport.findOne({ _id: new ObjectId(generalReportId) });
-        if (record) {
-            res.status(200).send(record);
-        } else if (!record) {
-            res.status(400).json({ message: 'Record Not Found' });
         }
     } catch (error: any) {
         res.status(500).send({ error: error.message });
@@ -49,6 +34,35 @@ reports.get('/reports/', async (req: Request, res: Response, next: NextFunction)
             res.status(200).send(records);
         } else if (!records) {
             res.status(400).json({ message: 'Records Not Found' });
+        }
+    } catch (error: any) {
+        res.status(500).send({ error: error.message });
+    }
+});
+
+// Get Most Recent General Report
+reports.get('/reports/latest', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const record = await GeneralReport.findOne({}, { sort: { createdAt: -1 } });
+        if (record) {
+            res.status(200).send(record);
+        } else if (!record) {
+            res.status(400).json({ message: 'Records Not Found' });
+        }
+    } catch (error: any) {
+        res.status(500).send({ error: error.message });
+    }
+});
+
+// Get a General Report
+reports.get('/reports/:reportId', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const generalReportId = req.params.reportId;
+        const record = await GeneralReport.findOne({ _id: new ObjectId(generalReportId) });
+        if (record) {
+            res.status(200).send(record);
+        } else if (!record) {
+            res.status(400).json({ message: 'Record Not Found' });
         }
     } catch (error: any) {
         res.status(500).send({ error: error.message });

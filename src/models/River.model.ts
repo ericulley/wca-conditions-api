@@ -4,8 +4,11 @@ import { db } from '../server';
 
 const ZRiver = z.object({
     _id: z.instanceof(ObjectId).optional(),
-    report: z.string(),
     date: z.date(),
+    name: z.string(),
+    station_id: z.number(),
+    hatches: z.string().optional(),
+    report: z.string(),
     createdAt: z.number().nullable(),
     updatedAt: z.number().optional().nullable(),
 });

@@ -17,7 +17,7 @@ const mongodb_1 = require("mongodb");
 const GeneralReport_model_1 = require("../models/GeneralReport.model");
 // General Report Router (e.g. {hostname}/general/...)
 const reports = express_1.default.Router();
-// Create and Archive a General Report
+// Create a General Report
 reports.post('/reports', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const reqData = req.body;
@@ -37,6 +37,37 @@ reports.post('/reports', (req, res, next) => __awaiter(void 0, void 0, void 0, f
         res.status(500).send({ error: error.message });
     }
 }));
+// Get All General Reports
+reports.get('/reports/', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const records = yield GeneralReport_model_1.GeneralReport.find({ _id: { $exists: true } }, { limit: 20 }).toArray();
+        if (records) {
+            res.status(200).send(records);
+        }
+        else if (!records) {
+            res.status(400).json({ message: 'Records Not Found' });
+        }
+    }
+    catch (error) {
+        res.status(500).send({ error: error.message });
+    }
+}));
+// Get Most Recent General Report
+reports.get('/reports/latest', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const record = yield GeneralReport_model_1.GeneralReport.findOne({}, { sort: { createdAt: -1 } });
+        console.log(record);
+        if (record) {
+            res.status(200).send(record);
+        }
+        else if (!record) {
+            res.status(400).json({ message: 'Records Not Found' });
+        }
+    }
+    catch (error) {
+        res.status(500).send({ error: error.message });
+    }
+}));
 // Get a General Report
 reports.get('/reports/:reportId', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -47,21 +78,6 @@ reports.get('/reports/:reportId', (req, res, next) => __awaiter(void 0, void 0, 
         }
         else if (!record) {
             res.status(400).json({ message: 'Record Not Found' });
-        }
-    }
-    catch (error) {
-        res.status(500).send({ error: error.message });
-    }
-}));
-// Get All General Reports
-reports.get('/reports/', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const records = yield GeneralReport_model_1.GeneralReport.find({ _id: { $exists: true } }, { limit: 20 }).toArray();
-        if (records) {
-            res.status(200).send(records);
-        }
-        else if (!records) {
-            res.status(400).json({ message: 'Records Not Found' });
         }
     }
     catch (error) {

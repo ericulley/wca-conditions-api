@@ -4,6 +4,7 @@
     "description": "backend for wca-conditions",
     "main": "src/server.js",
     "scripts": {
+        "dev": "npm run build && npm run start",
         "build": "rm -rf dist && tsc",
         "start": "node dist/server.js",
         "test": "echo \"Error: no test specified\" && exit 1"

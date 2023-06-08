@@ -15,10 +15,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const mongodb_1 = require("mongodb");
 const River_model_1 = require("../models/River.model");
-// General Report Router (e.g. {hostname}/general/...)
+// Rivers Router (e.g. {hostname}/rivers/...)
 const rivers = express_1.default.Router();
-// Create and Archive a General Report
-rivers.post('/rivers', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+// Create A River
+rivers.post('/', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const reqData = req.body;
         if (!reqData.createdAt)
@@ -37,8 +37,8 @@ rivers.post('/rivers', (req, res, next) => __awaiter(void 0, void 0, void 0, fun
         res.status(500).send({ error: error.message });
     }
 }));
-// Get a General Report
-rivers.get('/rivers/:reportId', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+// Get A River
+rivers.get('/:reportId', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const RiverId = req.params.reportId;
         const record = yield River_model_1.River.findOne({ _id: new mongodb_1.ObjectId(RiverId) });
@@ -53,10 +53,10 @@ rivers.get('/rivers/:reportId', (req, res, next) => __awaiter(void 0, void 0, vo
         res.status(500).send({ error: error.message });
     }
 }));
-// Get All General Reports
-rivers.get('/rivers/', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+// Get All Rivers
+rivers.get('/', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const records = yield River_model_1.River.find({ _id: { $exists: true } }, { limit: 20 }).toArray();
+        const records = yield River_model_1.River.find({ _id: { $exists: true } }, { limit: 10 }).toArray();
         if (records) {
             res.status(200).send(records);
         }
@@ -68,26 +68,37 @@ rivers.get('/rivers/', (req, res, next) => __awaiter(void 0, void 0, void 0, fun
         res.status(500).send({ error: error.message });
     }
 }));
-// Update General Report
-rivers.put('/rivers/:reportId', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+// Update A River
+rivers.put('/:reportId', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const reqData = req.body;
-        const RiverId = req.params.reportId;
-        const record = yield River_model_1.River.updateOne({ _id: new mongodb_1.ObjectId(RiverId) }, {
-            $set: {
-                report: reqData.report,
-                date: reqData.date,
-                updatedAt: Date.now(),
-            },
-        });
-        if (record.acknowledged && record.matchedCount > 0) {
-            res.status(200).send(record);
+        const riverId = req.params.reportId;
+        if (!River_model_1.ZRiver.safeParse(reqData).success) {
+            console.log('ZOD: ', River_model_1.ZRiver.safeParse(reqData));
+            return res.status(400).json({
+                error: 'Bad Request',
+                error_message: 'Missing required properties',
+            });
         }
-        if (record.acknowledged && record.matchedCount == 0) {
-            res.status(400).json({ message: 'Record Not Found' });
-        }
-        else if (!record) {
-            res.status(400).json({ message: 'Record Not Found' });
+        else {
+            const record = yield River_model_1.River.updateOne({ _id: new mongodb_1.ObjectId(riverId) }, {
+                $set: {
+                    name: reqData.name,
+                    date: reqData.date,
+                    hatches: reqData.hatches,
+                    report: reqData.report,
+                    updatedAt: Date.now(),
+                },
+            });
+            if (record.acknowledged && record.matchedCount > 0) {
+                res.status(200).send(record);
+            }
+            if (record.acknowledged && record.matchedCount == 0) {
+                res.status(400).json({ message: 'Record Not Found' });
+            }
+            else if (!record) {
+                res.status(400).json({ message: 'Record Not Found' });
+            }
         }
     }
     catch (error) {
@@ -95,11 +106,11 @@ rivers.put('/rivers/:reportId', (req, res, next) => __awaiter(void 0, void 0, vo
     }
 }));
 // Delete Genereal Report
-rivers.delete('/rivers/:reportId', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+rivers.delete('/:reportId', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const RiverId = req.params.reportId;
+        const riverId = req.params.reportId;
         const deletedRecord = yield River_model_1.River.deleteOne({
-            _id: new mongodb_1.ObjectId(RiverId),
+            _id: new mongodb_1.ObjectId(riverId),
         });
         if (deletedRecord.acknowledged && deletedRecord.deletedCount > 0)
             res.status(201).json({ message: 'Record Deleted' });

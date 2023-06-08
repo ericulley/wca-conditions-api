@@ -56,7 +56,6 @@ reports.get('/reports/', (req, res, next) => __awaiter(void 0, void 0, void 0, f
 reports.get('/reports/latest', (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const record = yield GeneralReport_model_1.GeneralReport.findOne({}, { sort: { createdAt: -1 } });
-        console.log(record);
         if (record) {
             res.status(200).send(record);
         }

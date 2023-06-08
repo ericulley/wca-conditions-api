@@ -24,6 +24,7 @@ const connectDB = async () => {
 
 // Import Controllers
 import reports from './controllers/GeneralReports.controller';
+import rivers from './controllers/Rivers.controller';
 
 // Start Server
 const startServer = async () => {
@@ -37,9 +38,10 @@ const startServer = async () => {
     app.use(helmet());
 
     // Routes
-    app.use('/general', reports);
     // Reports
+    app.use('/general', reports);
     // Rivers
+    app.use('/rivers', rivers);
     // Lakes
 
     //Health Check & Default Route

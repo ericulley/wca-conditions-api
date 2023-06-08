@@ -2,14 +2,15 @@ import { ObjectId } from 'mongodb';
 import { z } from 'zod';
 import { db } from '../server';
 
-const ZRiver = z.object({
+export const ZRiver = z.object({
     _id: z.instanceof(ObjectId).optional(),
-    date: z.date(),
     name: z.string(),
-    station_id: z.number(),
-    hatches: z.string().optional(),
+    date: z.string(),
+    stationId: z.number(),
+    cfs: z.string().optional(),
+    hatches: z.string(),
     report: z.string(),
-    createdAt: z.number().nullable(),
+    createdAt: z.number().optional().nullable(),
     updatedAt: z.number().optional().nullable(),
 });
 

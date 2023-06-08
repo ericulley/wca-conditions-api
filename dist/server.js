@@ -37,6 +37,7 @@ const connectDB = () => __awaiter(void 0, void 0, void 0, function* () {
 });
 // Import Controllers
 const GeneralReports_controller_1 = __importDefault(require("./controllers/GeneralReports.controller"));
+const Rivers_controller_1 = __importDefault(require("./controllers/Rivers.controller"));
 // Start Server
 const startServer = () => __awaiter(void 0, void 0, void 0, function* () {
     // Connect to DB
@@ -50,6 +51,7 @@ const startServer = () => __awaiter(void 0, void 0, void 0, function* () {
     app.use('/general', GeneralReports_controller_1.default);
     // Reports
     // Rivers
+    app.use('/rivers', Rivers_controller_1.default);
     // Lakes
     //Health Check & Default Route
     app.get('/', (req, res, next) => {

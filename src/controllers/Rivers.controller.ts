@@ -1,7 +1,6 @@
 import express, { NextFunction, Request, Response } from 'express';
 import { ObjectId, UpdateResult } from 'mongodb';
 import { River, TRiver, ZRiver } from '../models/River.model';
-import log from '../utils/logger';
 
 // Rivers Router (e.g. {hostname}/rivers/...)
 const rivers = express.Router();
@@ -89,10 +88,10 @@ rivers.put('/:reportId', async (req: Request, res: Response, next: NextFunction)
     }
 });
 
-// Delete Genereal Report
-rivers.delete('/:reportId', async (req: Request, res: Response, next: NextFunction) => {
+// Delete A River
+rivers.delete('/:riverId', async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const riverId = req.params.reportId;
+        const riverId = req.params.riverId;
         const deletedRecord = await River.deleteOne({
             _id: new ObjectId(riverId),
         });

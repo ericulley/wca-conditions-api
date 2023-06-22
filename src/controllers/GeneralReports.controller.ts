@@ -7,6 +7,7 @@ import {
     readLatestGeneralReport,
     updateGeneralReport,
 } from '../services/GeneralReport.services';
+import checkJwt from '../utils/auth';
 
 // General Report Router (e.g. {hostname}/general/...)
 const reports = express.Router();
@@ -37,8 +38,12 @@ reports.put('/reports/:reportId', async (req: Request, res: Response, next: Next
 });
 
 // Delete Genereal Report
-reports.delete('/reports/:reportId', async (req: Request, res: Response, next: NextFunction) => {
-    deleteGeneralReport(req, res, next);
-});
+reports.delete(
+    '/reports/:reportId',
+    checkJwt,
+    async (req: Request, res: Response, next: NextFunction) => {
+        deleteGeneralReport(req, res, next);
+    }
+);
 
 export default reports;

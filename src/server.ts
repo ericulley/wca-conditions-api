@@ -1,5 +1,4 @@
 import express from 'express';
-// import { db } from './db';
 import { config } from './config/config';
 import { MongoClient } from 'mongodb';
 import log from './utils/logger';
@@ -25,6 +24,7 @@ const connectDB = async () => {
 // Import Controllers
 import reports from './controllers/GeneralReports.controller';
 import rivers from './controllers/Rivers.controller';
+import checkJwt from './utils/auth';
 
 // Start Server
 const startServer = async () => {

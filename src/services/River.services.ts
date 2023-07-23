@@ -39,6 +39,7 @@ export const readAllRivers = async (req: Request, res: Response, next: NextFunct
     try {
         const records = await River.find({ _id: { $exists: true } }, { limit: 10 }).toArray();
         if (records) {
+            console.log('Records: ', records);
             res.status(200).send(records);
         } else if (!records) {
             res.status(400).json({ message: 'Records Not Found' });
@@ -52,8 +53,12 @@ export const readAllRivers = async (req: Request, res: Response, next: NextFunct
 export const updateRiver = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const reqData = req.body as TRiver;
-        const riverId = req.params.reportId;
+        reqData._id = reqData._id as ObjectId;
+        console.log('typeof: ', typeof reqData._id);
+        const riverId = req.params.reportId as string;
+        console.log('Update A River: ', reqData);
         if (!ZRiver.safeParse(reqData).success) {
+            console.log('Parse: ', ZRiver.safeParse(reqData));
             return res.status(400).json({
                 error: 'Bad Request',
                 error_message: 'Missing required properties',

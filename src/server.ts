@@ -1,6 +1,6 @@
 import express from 'express';
 import { config } from './config/config';
-import { MongoClient } from 'mongodb';
+import { MongoClient, MongoError } from 'mongodb';
 import log from './utils/logger';
 import helmet from 'helmet';
 import cors from 'cors';
@@ -24,6 +24,7 @@ const connectDB = async () => {
 // Import Controllers
 import reports from './controllers/GeneralReports.controller';
 import rivers from './controllers/Rivers.controller';
+import archive from './controllers/Archive.controller';
 import checkJwt from './utils/auth';
 
 // Start Server
@@ -37,12 +38,17 @@ const startServer = async () => {
     app.use(cors());
     app.use(helmet());
 
-    // Routes
+    /********
+     * Routes
+     *********/
     // Reports
     app.use('/general', reports);
     // Rivers
     app.use('/rivers', rivers);
     // Lakes
+
+    // Archive
+    app.use('/archive', archive);
 
     //Health Check & Default Route
     app.get('/', (req, res, next) => {

@@ -16,4 +16,4 @@ export const ZArchive = z.object({
 
 export type TArchive = z.infer<typeof ZArchive>;
 
-export const BodyOfWater = db.collection<TArchive>('archive');
+export const Archive = db.collection<TArchive>('archive');
